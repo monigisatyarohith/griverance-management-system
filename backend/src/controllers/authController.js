@@ -131,7 +131,7 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     // Send reset email
-    const resetUrl = `https://ai-griverance-system.vercel.app/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
     await sendEmail({
       email: user.email,
       subject: 'Password Reset Request',
