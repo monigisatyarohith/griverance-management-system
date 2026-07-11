@@ -36,6 +36,12 @@ exports.createComplaint = async (req, res) => {
   try {
     const { title, description, category, priority, complainantType } = req.body;
     
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'At least one attachment is required' });
+    }
+
+    const attachmentPaths = req.files.map(file => file.path);
+
     // AI categorization if category not provided
     let finalCategory = category;
     if (!finalCategory && process.env.OPENAI_API_KEY) {
@@ -50,6 +56,7 @@ exports.createComplaint = async (req, res) => {
       priority: priority || 'medium',
       studentId: req.user.id,
       status: 'Pending Vice Principal Approval',
+      attachments: attachmentPaths,
       timeline: [{
         status: 'Pending Vice Principal Approval',
         message: 'Grievance submitted and pending Vice Principal approval',

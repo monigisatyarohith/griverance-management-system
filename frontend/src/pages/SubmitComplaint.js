@@ -37,6 +37,7 @@ const SubmitComplaint = () => {
     defaultValues: { complainantType: 'student' }
   });
   const [files, setFiles] = useState([]);
+  const [fileError, setFileError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const description = watch('description');
@@ -47,6 +48,12 @@ const SubmitComplaint = () => {
   const selectedCategoryInfo = categories.find(c => c.value === selectedCategory);
 
   const onSubmit = async (data) => {
+    if (files.length === 0) {
+      setFileError('At least one attachment is required');
+      toast.error('Please upload at least one attachment');
+      return;
+    }
+    setFileError('');
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append('title', data.title);
@@ -75,11 +82,18 @@ const SubmitComplaint = () => {
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length > 0) {
+      setFileError('');
+    }
     setFiles([...files, ...selectedFiles]);
   };
 
   const removeFile = (index) => {
-    setFiles(files.filter((_, i) => i !== index));
+    const updatedFiles = files.filter((_, i) => i !== index);
+    setFiles(updatedFiles);
+    if (updatedFiles.length === 0) {
+      setFileError('At least one attachment is required');
+    }
   };
 
   return (
@@ -193,7 +207,7 @@ const SubmitComplaint = () => {
 
           {/* File Attachments */}
           <div>
-            <label className="block text-sm font-medium mb-2">Attachments (Optional)</label>
+            <label className="block text-sm font-medium mb-2">Attachments *</label>
             <div className="border-2 border-dashed rounded-lg p-6 text-center">
               <input
                 type="file"
@@ -222,6 +236,7 @@ const SubmitComplaint = () => {
                 ))}
               </div>
             )}
+            {fileError && <p className="text-red-500 text-sm mt-1">{fileError}</p>}
           </div>
 
           {/* Submit Button */}
