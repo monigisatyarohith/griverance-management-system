@@ -9,6 +9,8 @@ const errorHandler = require('./middleware/errorHandler');
 // Load env vars
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
+const { FRONTEND_URL } = require('./config/constants');
+
 // Import models (this sets up associations)
 const { sequelize } = require('./models');
 
@@ -17,7 +19,7 @@ const app = express();
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: FRONTEND_URL,
   credentials: true
 }));
 

@@ -7,6 +7,7 @@ const GrievanceUpdate = require('../models/GrievanceUpdate');
 const Setting = require('../models/Setting');
 const sendEmail = require('../utils/sendEmail');
 const { aiCategorizeComplaint } = require('../services/aiService');
+const { FRONTEND_URL } = require('../config/constants');
 
 // Helper: map category to coordinatorType
 const getCoordinatorType = (category) => {
@@ -73,7 +74,7 @@ exports.createComplaint = async (req, res) => {
       vpEmail = vp ? vp.email : 'viceprincipal@college.edu';
     }
 
-    const actionUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/complaint/${complaint.id}`;
+    const actionUrl = `${FRONTEND_URL}/complaint/${complaint.id}`;
     const submissionDate = new Date().toLocaleString();
 
     // Send VP and Student notification emails concurrently

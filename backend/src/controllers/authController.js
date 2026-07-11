@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 const AuditLog = require('../models/AuditLog');
+const { FRONTEND_URL } = require('../config/constants');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -40,7 +41,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     // Send verification email
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+    const verificationUrl = `${FRONTEND_URL}/verify-email/${verificationToken}`;
     await sendEmail({
       email: user.email,
       subject: 'Email Verification',
@@ -131,7 +132,7 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     // Send reset email
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const resetUrl = `${FRONTEND_URL}/reset-password/${resetToken}`;
     await sendEmail({
       email: user.email,
       subject: 'Password Reset Request',
