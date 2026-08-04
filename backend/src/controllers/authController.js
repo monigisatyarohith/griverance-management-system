@@ -12,6 +12,25 @@ const generateToken = (id) => {
   });
 };
 
+// @desc    Check if email exists
+// @route   POST /api/auth/check-email
+// @access  Public
+exports.checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ exists: false, message: 'Email is required' });
+    }
+    const user = await User.findOne({ where: { email: email.toLowerCase().trim() } });
+    if (user) {
+      return res.json({ exists: true, message: 'An account with this email already exists' });
+    }
+    return res.json({ exists: false, message: 'Email is available' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
@@ -19,10 +38,12 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, role, department } = req.body;
 
+    const normalizedEmail = email ? email.toLowerCase().trim() : '';
+
     // Check if user exists
-    const userExists = await User.scope('withPassword').findOne({ where: { email } });
+    const userExists = await User.scope('withPassword').findOne({ where: { email: normalizedEmail } });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'User with this email already exists' });
     }
 
     // Create user

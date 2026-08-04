@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LockClosedIcon, EyeIcon, EyeSlashIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import api from '../services/api';
+import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
 const ResetPassword = () => {
@@ -30,7 +30,7 @@ const ResetPassword = () => {
 
     setIsLoading(true);
     try {
-      await api.put(`/auth/reset-password/${token}`, { password });
+      await authAPI.resetPassword(token, password);
       setIsResetSuccess(true);
       toast.success('Password reset successful!');
     } catch (error) {

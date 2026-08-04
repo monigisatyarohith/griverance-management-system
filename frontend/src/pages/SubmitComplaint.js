@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import { complaintAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { CloudArrowUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
@@ -23,13 +23,6 @@ const staffCategories = [
   { value: 'pay_perks', label: 'Pay & Perks', escalation: 'Principal' },
   { value: 'service', label: 'Service', escalation: 'Principal' },
   { value: 'other', label: 'Other', escalation: 'Concerned Officer → Vice-Principal → Principal' },
-];
-
-const priorities = [
-  { value: 'low', label: 'Low', color: 'bg-green-500' },
-  { value: 'medium', label: 'Medium', color: 'bg-yellow-500' },
-  { value: 'high', label: 'High', color: 'bg-orange-500' },
-  { value: 'urgent', label: 'Urgent', color: 'bg-red-500' },
 ];
 
 const SubmitComplaint = () => {
@@ -67,12 +60,10 @@ const SubmitComplaint = () => {
     });
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/complaints`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await complaintAPI.create(formData);
 
       toast.success('Complaint submitted successfully!');
-      navigate(`/complaint/${response.data.data._id}`);
+      navigate(`/complaint/${response.data.data._id || response.data.data.id}`);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to submit complaint');
     } finally {

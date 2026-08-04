@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { complaintAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   ArrowLeftIcon, 
-  ClockIcon, 
   UserIcon, 
-  CheckCircleIcon, 
   ExclamationTriangleIcon,
   DocumentArrowDownIcon,
   CalendarIcon,
@@ -58,16 +56,14 @@ const ComplaintDetail = () => {
     try {
       setLoading(true);
       
-      // Fetch complaint detail (from full list)
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/complaints`);
+      const res = await complaintAPI.getAll();
       const found = res.data.data.find(c => String(c.id) === String(id) || String(c._id) === String(id));
       
       if (found) {
         setComplaint(found);
         setVpPriority(found.priority || 'medium');
         
-        // Fetch custom updates history
-        const updatesRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/complaints/${found.id}/updates`);
+        const updatesRes = await complaintAPI.getUpdates(found.id);
         setUpdates(updatesRes.data.data);
       }
     } catch (error) {
@@ -81,12 +77,13 @@ const ComplaintDetail = () => {
   const handleVpDecision = async (decision) => {
     setSubmitting(true);
     try {
-      const endpoint = `${process.env.REACT_APP_API_URL}/api/complaints/${complaint.id}/${decision}`;
       const payload = { remarks: vpRemarks };
       if (decision === 'approve') {
         payload.priority = vpPriority;
+        await complaintAPI.approve(complaint.id, payload);
+      } else {
+        await complaintAPI.reject(complaint.id, payload);
       }
-      await axios.put(endpoint, payload);
       toast.success(`Complaint successfully ${decision === 'approve' ? 'Approved' : 'Rejected'}`);
       setVpRemarks('');
       fetchComplaintAndUpdates();
@@ -101,8 +98,7 @@ const ComplaintDetail = () => {
   const handlePriorityChange = async (newPriority) => {
     setSubmitting(true);
     try {
-      const endpoint = `${process.env.REACT_APP_API_URL}/api/complaints/${complaint.id}/priority`;
-      await axios.put(endpoint, { priority: newPriority });
+      await complaintAPI.updatePriority(complaint.id, newPriority);
       toast.success(`Priority updated to ${newPriority}`);
       fetchComplaintAndUpdates();
     } catch (error) {
@@ -132,11 +128,7 @@ const ComplaintDetail = () => {
         formData.append('attachments', attachment);
       }
 
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/complaints/${complaint.id}/updates`,
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      );
+      await complaintAPI.addUpdate(complaint.id, formData);
 
       toast.success('Stage update posted successfully');
       setNewStatus('');

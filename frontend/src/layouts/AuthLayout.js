@@ -49,7 +49,7 @@ const AuthLayout = () => {
   ];
 
   const getFlows = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'staff': return staffFlows;
       case 'alternate': return alternateFlows;
       default: return studentFlows;
@@ -101,11 +101,10 @@ const AuthLayout = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                    activeTab === tab.id
+                  className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${activeTab === tab.id
                       ? 'bg-white text-purple-700 shadow-md'
                       : 'text-white/75 hover:text-white hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -134,11 +133,10 @@ const AuthLayout = () => {
                       <div className="flex flex-wrap items-center gap-1.5">
                         {flow.steps.map((step, sIndex) => (
                           <React.Fragment key={step}>
-                            <span className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
-                              sIndex === flow.steps.length - 1
+                            <span className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${sIndex === flow.steps.length - 1
                                 ? 'bg-purple-500/30 text-purple-200 border border-purple-400/30 font-semibold'
                                 : 'bg-white/10 text-white border border-white/5'
-                            }`}>
+                              }`}>
                               {step}
                             </span>
                             {sIndex < flow.steps.length - 1 && (
@@ -159,7 +157,7 @@ const AuthLayout = () => {
 
         {/* Footer */}
         <div className="relative z-10 flex justify-between items-center text-white/40 text-xs">
-          <p>© 2024 College Grievance System. All rights reserved.</p>
+          <p>© 2026 College Grievance System. All rights reserved.</p>
         </div>
       </motion.div>
 

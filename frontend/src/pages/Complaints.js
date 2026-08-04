@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { complaintAPI } from '../services/api';
 import { Link } from 'react-router-dom';
 import { 
   MagnifyingGlassIcon,
-  FunnelIcon,
   DocumentTextIcon 
 } from '@heroicons/react/24/outline';
 
 const statusColors = {
-  submitted: 'bg-blue-100 text-blue-800',
-  under_review: 'bg-yellow-100 text-yellow-800',
-  in_progress: 'bg-orange-100 text-orange-800',
-  escalated: 'bg-red-100 text-red-800',
-  resolved: 'bg-green-100 text-green-800',
-  rejected: 'bg-gray-100 text-gray-800',
+  'Pending Vice Principal Approval': 'bg-yellow-100 text-yellow-800',
+  'Approved by Vice Principal': 'bg-blue-100 text-blue-800',
+  'Rejected by Vice Principal': 'bg-red-100 text-red-800',
+  'Under Review': 'bg-orange-100 text-orange-800',
+  'Investigation Started': 'bg-amber-100 text-amber-800',
+  'In Progress': 'bg-indigo-100 text-indigo-800',
+  'Awaiting Information': 'bg-purple-100 text-purple-800',
+  'Escalated': 'bg-rose-100 text-rose-800',
+  'Resolved': 'bg-green-100 text-green-800',
+  'Closed': 'bg-gray-100 text-gray-800'
 };
 
 const priorityColors = {
@@ -45,7 +48,7 @@ const Complaints = () => {
       if (statusFilter) params.status = statusFilter;
       if (categoryFilter) params.category = categoryFilter;
 
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/complaints`, { params });
+      const res = await complaintAPI.getAll(params);
       setComplaints(res.data.data);
       setPagination(res.data.pagination);
     } catch (error) {
@@ -113,12 +116,16 @@ const Complaints = () => {
               className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 text-sm"
             >
               <option value="">All Status</option>
-              <option value="submitted">Submitted</option>
-              <option value="under_review">Under Review</option>
-              <option value="in_progress">In Progress</option>
-              <option value="escalated">Escalated</option>
-              <option value="resolved">Resolved</option>
-              <option value="rejected">Rejected</option>
+              <option value="Pending Vice Principal Approval">Pending VP Approval</option>
+              <option value="Approved by Vice Principal">Approved VP</option>
+              <option value="Rejected by Vice Principal">Rejected VP</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Investigation Started">Investigation Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Awaiting Information">Awaiting Information</option>
+              <option value="Escalated">Escalated</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
             </select>
             <select
               value={categoryFilter}
@@ -183,8 +190,8 @@ const Complaints = () => {
                       {complaint.description}
                     </p>
                     <div className="flex items-center gap-3 mt-3">
-                      <span className={`text-xs px-2 py-1 rounded-full ${statusColors[complaint.status]}`}>
-                        {complaint.status.replace('_', ' ')}
+                      <span className={`text-xs px-2 py-1 rounded-full ${statusColors[complaint.status] || 'bg-gray-100 text-gray-800'}`}>
+                        {complaint.status}
                       </span>
                       <span className={`text-xs px-2 py-1 rounded-full ${priorityColors[complaint.priority]}`}>
                         {complaint.priority}

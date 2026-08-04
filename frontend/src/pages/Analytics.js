@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { complaintAPI } from '../services/api';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#6B7280'];
 
@@ -14,8 +14,8 @@ const Analytics = () => {
   const fetchAnalytics = async () => {
     try {
       const [statsRes, complaintsRes] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_URL}/api/complaints/stats`),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/complaints?limit=100`)
+        complaintAPI.getStats(),
+        complaintAPI.getAll({ limit: 100 })
       ]);
       setStats({
         ...statsRes.data.stats,
@@ -24,19 +24,20 @@ const Analytics = () => {
         complaints: complaintsRes.data.data
       });
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching analytics:', error);
     } finally { setLoading(false); }
   };
 
   if (loading) return <div className="flex items-center justify-center h-96"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div></div>;
 
   const statusData = [
-    { name: 'Submitted', value: stats?.submitted || 0 },
+    { name: 'Pending VP', value: stats?.pendingVP || 0 },
+    { name: 'Approved VP', value: stats?.approvedVP || 0 },
     { name: 'Under Review', value: stats?.underReview || 0 },
     { name: 'In Progress', value: stats?.inProgress || 0 },
     { name: 'Escalated', value: stats?.escalated || 0 },
     { name: 'Resolved', value: stats?.resolved || 0 },
-    { name: 'Rejected', value: stats?.rejected || 0 },
+    { name: 'Rejected VP', value: stats?.rejectedVP || 0 },
   ].filter(d => d.value > 0);
 
   const categoryData = (stats?.categoryStats || []).map((c, i) => ({

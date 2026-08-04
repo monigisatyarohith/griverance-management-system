@@ -12,7 +12,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   UserGroupIcon,
-  Cog6ToothIcon,
   Bars3Icon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -42,14 +41,14 @@ const MainLayout = () => {
   }, []);
 
   const menuItems = [
-    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard', roles: ['student', 'faculty', 'hod', 'admin'] },
+    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal'] },
     { path: '/complaints', icon: DocumentTextIcon, label: 'My Complaints', roles: ['student'] },
-    { path: '/assigned-complaints', icon: DocumentTextIcon, label: 'Assigned Complaints', roles: ['faculty', 'hod'] },
+    { path: '/complaints', icon: DocumentTextIcon, label: 'Assigned Complaints', roles: ['faculty', 'hod', 'coordinator', 'vice_principal'] },
     { path: '/submit-complaint', icon: PlusCircleIcon, label: 'Submit Complaint', roles: ['student'] },
-    { path: '/notifications', icon: BellIcon, label: 'Notifications', roles: ['student', 'faculty', 'hod', 'admin'] },
-    { path: '/analytics', icon: ChartBarIcon, label: 'Analytics', roles: ['admin', 'hod'] },
+    { path: '/notifications', icon: BellIcon, label: 'Notifications', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal'] },
+    { path: '/analytics', icon: ChartBarIcon, label: 'Analytics', roles: ['admin', 'hod', 'vice_principal'] },
     { path: '/admin/users', icon: UserGroupIcon, label: 'User Management', roles: ['admin'] },
-    { path: '/profile', icon: UserCircleIcon, label: 'Profile', roles: ['student', 'faculty', 'hod', 'admin'] },
+    { path: '/profile', icon: UserCircleIcon, label: 'Profile', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal'] },
   ];
 
   const filteredMenu = menuItems.filter(item => item.roles.includes(user?.role));

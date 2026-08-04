@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import { notificationAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { BellIcon, CheckIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
@@ -13,23 +13,23 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/notifications`);
+      const res = await notificationAPI.getAll();
       setNotifications(res.data.data);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching notifications:', error);
     } finally { setLoading(false); }
   };
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`${process.env.REACT_APP_API_URL}/api/notifications/${id}/read`);
+      await notificationAPI.markRead(id);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (error) { toast.error('Failed to mark as read'); }
   };
 
   const markAllRead = async () => {
     try {
-      await axios.put(`${process.env.REACT_APP_API_URL}/api/notifications/read-all`);
+      await notificationAPI.markAllRead();
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       toast.success('All marked as read');
     } catch (error) { toast.error('Failed'); }

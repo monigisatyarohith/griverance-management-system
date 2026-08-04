@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
 import { UserCircleIcon, EnvelopeIcon, AcademicCapIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 const Profile = () => {

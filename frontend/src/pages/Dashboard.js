@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { complaintAPI } from '../services/api';
 import { 
   DocumentTextIcon, 
   CheckCircleIcon, 
   ClockIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
-  PlusIcon,
-  PaperAirplaneIcon
+  PlusIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -33,22 +32,22 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const statsRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/complaints/stats`);
+      const statsRes = await complaintAPI.getStats();
       setStats(statsRes.data.stats);
 
       // Construct status filter based on role & active tab
-      let statusQuery = '';
+      const params = {};
       if (user?.role === 'vice_principal') {
-        if (activeTab === 'pending') statusQuery = '?status=Pending Vice Principal Approval';
-        else if (activeTab === 'approved') statusQuery = '?status=Approved by Vice Principal';
-        else if (activeTab === 'rejected') statusQuery = '?status=Rejected by Vice Principal';
+        if (activeTab === 'pending') params.status = 'Pending Vice Principal Approval';
+        else if (activeTab === 'approved') params.status = 'Approved by Vice Principal';
+        else if (activeTab === 'rejected') params.status = 'Rejected by Vice Principal';
       } else if (user?.role === 'coordinator') {
-        if (activeTab === 'pending') statusQuery = '?status=Approved by Vice Principal';
-        else if (activeTab === 'in_progress') statusQuery = '?status=In Progress';
-        else if (activeTab === 'resolved') statusQuery = '?status=Resolved';
+        if (activeTab === 'pending') params.status = 'Approved by Vice Principal';
+        else if (activeTab === 'in_progress') params.status = 'In Progress';
+        else if (activeTab === 'resolved') params.status = 'Resolved';
       }
 
-      const complaintsRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/complaints${statusQuery}`);
+      const complaintsRes = await complaintAPI.getAll(params);
       setComplaints(complaintsRes.data.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -61,14 +60,15 @@ const Dashboard = () => {
   const handleProcessComplaint = async () => {
     try {
       const { type, complaintId } = actionModal;
-      const endpoint = `${process.env.REACT_APP_API_URL}/api/complaints/${complaintId}/${type}`;
       
       const payload = { remarks: actionRemarks };
       if (type === 'approve') {
         payload.priority = actionPriority;
+        await complaintAPI.approve(complaintId, payload);
+      } else {
+        await complaintAPI.reject(complaintId, payload);
       }
       
-      await axios.put(endpoint, payload);
       toast.success(`Complaint successfully ${type}d`);
       
       setActionModal({ show: false, type: null, complaintId: null });

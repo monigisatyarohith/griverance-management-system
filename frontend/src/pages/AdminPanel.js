@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import { adminAPI } from '../services/api';
 import { 
   UserGroupIcon, 
   TrashIcon, 
@@ -16,8 +16,6 @@ import {
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-
-const axiosLib = axios;
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('users');
@@ -49,7 +47,7 @@ const AdminPanel = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axiosLib.get(`${process.env.REACT_APP_API_URL}/api/admin/users`);
+      const res = await adminAPI.getUsers();
       setUsers(res.data.data);
     } catch (error) {
       toast.error('Failed to fetch users');
@@ -61,7 +59,7 @@ const AdminPanel = () => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const res = await axiosLib.get(`${process.env.REACT_APP_API_URL}/api/admin/settings`);
+      const res = await adminAPI.getSettings();
       const dbSettings = res.data.data;
       
       const newSettings = { ...settings };
@@ -80,7 +78,7 @@ const AdminPanel = () => {
 
   const updateUser = async (id, data) => {
     try {
-      await axiosLib.put(`${process.env.REACT_APP_API_URL}/api/admin/users/${id}`, data);
+      await adminAPI.updateUser(id, data);
       toast.success('User updated');
       setEditingUser(null);
       fetchUsers();
@@ -92,7 +90,7 @@ const AdminPanel = () => {
   const deleteUser = async (id) => {
     if (!window.confirm('Delete this user?')) return;
     try {
-      await axiosLib.delete(`${process.env.REACT_APP_API_URL}/api/admin/users/${id}`);
+      await adminAPI.deleteUser(id);
       toast.success('User deleted');
       fetchUsers();
     } catch (error) { 
@@ -113,7 +111,7 @@ const AdminPanel = () => {
     setUpdatingSettings(true);
     try {
       const payload = Object.entries(settings).map(([key, value]) => ({ key, value }));
-      await axiosLib.post(`${process.env.REACT_APP_API_URL}/api/admin/settings`, payload);
+      await adminAPI.saveSettings(payload);
       toast.success('Email routing configurations saved successfully!');
     } catch (error) {
       toast.error('Failed to save email settings');

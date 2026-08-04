@@ -99,22 +99,6 @@ const Login = () => {
           Create one
         </Link>
       </p>
-
-      {/* Demo credentials */}
-      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-        <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2">Demo Credentials</p>
-        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
-          <div>
-            <span className="font-medium">Student:</span>
-            <br />student@college.edu
-          </div>
-          <div>
-            <span className="font-medium">Admin:</span>
-            <br />admin@college.edu
-          </div>
-        </div>
-        <p className="text-xs text-gray-400 mt-1">Password: [role]123</p>
-      </div>
     </div>
   );
 };

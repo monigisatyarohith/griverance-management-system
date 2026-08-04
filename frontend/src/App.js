@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
@@ -17,7 +17,6 @@ import Dashboard from './pages/Dashboard';
 import Complaints from './pages/Complaints';
 import SubmitComplaint from './pages/SubmitComplaint';
 import ComplaintDetail from './pages/ComplaintDetail';
-import AIChatbot from './components/AIChatbot';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
@@ -50,7 +49,6 @@ function App() {
             </Route>
           </Route>
         </Routes>
-        <AIChatbot />
       </AuthProvider>
     </Router>
   );
