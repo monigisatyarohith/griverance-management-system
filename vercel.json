@@ -5,7 +5,8 @@
   "installCommand": "npm install && cd backend && npm install",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/uploads/(.*)", "destination": "/api/index.js" },
+    { "source": "/((?!api/|uploads/).*)", "destination": "/index.html" }
   ],
   "functions": {
     "api/index.js": {

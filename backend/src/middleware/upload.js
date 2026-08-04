@@ -1,18 +1,28 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
-const uploadDir = path.join(__dirname, '../../uploads');
+// Use /tmp/uploads in serverless environments (Vercel) to avoid EROFS read-only filesystem errors
+const uploadDir = (process.env.VERCEL || process.env.NODE_ENV === 'production')
+  ? path.join(os.tmpdir(), 'uploads')
+  : path.join(__dirname, '../../uploads');
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+const ensureUploadDir = () => {
+  if (!fs.existsSync(uploadDir)) {
+    try {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    } catch (e) {
+      console.error('Failed to create upload dir:', e.message);
+    }
+  }
+};
+
+ensureUploadDir();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    ensureUploadDir();
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {

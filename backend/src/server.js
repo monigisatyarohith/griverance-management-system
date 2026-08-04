@@ -36,11 +36,28 @@ app.use(express.urlencoded({ extended: true }));
 
 // Static files for uploads
 const fs = require('fs');
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+const os = require('os');
+
+const serverlessUploadDir = path.join(os.tmpdir(), 'uploads');
+const localUploadDir = path.join(__dirname, '../uploads');
+
+if (!fs.existsSync(serverlessUploadDir)) {
+  try {
+    fs.mkdirSync(serverlessUploadDir, { recursive: true });
+  } catch (e) {
+    // ignore
+  }
 }
-app.use('/uploads', express.static(uploadDir));
+if (!fs.existsSync(localUploadDir)) {
+  try {
+    fs.mkdirSync(localUploadDir, { recursive: true });
+  } catch (e) {
+    // ignore
+  }
+}
+
+app.use('/uploads', express.static(serverlessUploadDir));
+app.use('/uploads', express.static(localUploadDir));
 
 // Sync database on first request (for serverless)
 let dbSynced = false;
