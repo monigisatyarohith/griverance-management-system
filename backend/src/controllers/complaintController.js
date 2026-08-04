@@ -41,7 +41,7 @@ exports.createComplaint = async (req, res) => {
       return res.status(400).json({ message: 'At least one attachment is required' });
     }
 
-    const attachmentPaths = req.files.map(file => file.path);
+    const attachmentPaths = req.files.map(file => `uploads/${file.filename}`);
 
     // AI categorization if category not provided
     let finalCategory = category;
@@ -484,7 +484,7 @@ exports.addGrievanceUpdate = async (req, res) => {
 
     let attachmentPath = null;
     if (req.files && req.files.length > 0) {
-      attachmentPath = req.files[0].path;
+      attachmentPath = `uploads/${req.files[0].filename}`;
     }
 
     // Create GrievanceUpdate history
