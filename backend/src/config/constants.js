@@ -1,12 +1,13 @@
 module.exports = {
-  FRONTEND_URL: process.env.FRONTEND_URL || 'https://ai-griverance-system.vercel.app/',
+  FRONTEND_URL: process.env.FRONTEND_URL || 'https://griverance-management-system.vercel.app/',
   ROLES: {
     STUDENT: 'student',
     FACULTY: 'faculty',
     HOD: 'hod',
     ADMIN: 'admin',
     VICE_PRINCIPAL: 'vice_principal',
-    COORDINATOR: 'coordinator'
+    COORDINATOR: 'coordinator',
+    PRINCIPAL: 'principal'
   },
   COMPLAINT_STATUS: {
     PENDING_VP: 'Pending Vice Principal Approval',
