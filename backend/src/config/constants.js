@@ -1,5 +1,5 @@
 module.exports = {
-  FRONTEND_URL: process.env.FRONTEND_URL || 'https://griverance-management-system.vercel.app/',
+  FRONTEND_URL: (process.env.FRONTEND_URL || 'https://griverance-management-system.vercel.app').replace(/\/$/, ''),
   ROLES: {
     STUDENT: 'student',
     FACULTY: 'faculty',

@@ -18,8 +18,22 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+
+const configuredFrontendUrl = (FRONTEND_URL || '').replace(/\/$/, '');
+
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const cleanOrigin = origin.replace(/\/$/, '');
+    if (
+      cleanOrigin === configuredFrontendUrl ||
+      cleanOrigin.includes('localhost') ||
+      cleanOrigin.endsWith('.vercel.app')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true
 }));
 
