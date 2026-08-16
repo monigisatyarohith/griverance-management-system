@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const getBaseApiUrl = () => {
+  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://localhost:5000';
+  }
+  return '';
+};
+
+const API_URL = getBaseApiUrl();
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
@@ -40,6 +48,9 @@ export const authAPI = {
   getMe: () => api.get('/auth/me'),
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
   resetPassword: (token, password) => api.put(`/auth/reset-password/${token}`, { password }),
+  updatePassword: (data) => api.put('/auth/update-password', data),
+  getCoordinators: () => api.get('/auth/coordinators'),
+  saveCoordinator: (data) => api.post('/auth/coordinators', data),
 };
 
 // Complaints API
@@ -56,6 +67,7 @@ export const complaintAPI = {
   addUpdate: (id, formData) => api.post(`/complaints/${id}/updates`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  addRemarks: (id, remarks) => api.post(`/complaints/${id}/remarks`, { remarks }),
   getStats: () => api.get('/complaints/stats'),
 };
 

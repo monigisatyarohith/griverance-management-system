@@ -164,7 +164,8 @@ const ComplaintDetail = () => {
     if (!filePath) return '';
     const normalized = filePath.replace(/\\/g, '/');
     const relative = normalized.replace(/^backend\//, '').replace(/^src\//, '');
-    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/${relative}`;
+    const baseUrl = process.env.REACT_APP_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:5000' : '');
+    return `${baseUrl}/${relative}`;
   };
 
   if (loading) {
@@ -190,6 +191,7 @@ const ComplaintDetail = () => {
 
   const isAssignedCoordinator = user?.role === 'coordinator' && complaint.assignedToId === user.id;
   const isVP = user?.role === 'vice_principal';
+  const isPrincipal = user?.role === 'principal';
   const isAdmin = user?.role === 'admin';
   const progressPercent = getProgressPercentage(complaint.status);
 
@@ -323,8 +325,8 @@ const ComplaintDetail = () => {
         </div>
       </div>
 
-      {/* Vice Principal / Admin Priority Manager */}
-      {(isVP || isAdmin) && (
+      {/* Vice Principal / Principal / Admin Priority Manager */}
+      {(isVP || isPrincipal || isAdmin) && (
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-150 dark:border-gray-700 p-4 sm:p-8 space-y-4 animate-fadeIn">
           <div className="flex items-center space-x-2 border-b border-gray-100 dark:border-gray-700 pb-3">
             <ExclamationTriangleIcon className="w-5 h-5 text-purple-600" />
@@ -332,7 +334,7 @@ const ComplaintDetail = () => {
           </div>
           <div className="space-y-3">
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl">
-              As a Vice Principal or Administrator, you can update the priority of this grievance at any point during its investigation cycle.
+              As a Principal, Vice Principal, or Administrator, you can update the priority of this grievance at any point during its investigation cycle.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
@@ -363,12 +365,14 @@ const ComplaintDetail = () => {
         </div>
       )}
 
-      {/* Vice Principal Approvals form */}
-      {isVP && complaint.status === 'Pending Vice Principal Approval' && (
+      {/* Review & Approvals Form (Principal / Vice Principal / Admin) */}
+      {(isVP || isPrincipal || isAdmin) && complaint.status === 'Pending Vice Principal Approval' && (
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-150 dark:border-gray-700 p-4 sm:p-8 space-y-4">
           <div className="flex items-center space-x-2 border-b border-gray-100 dark:border-gray-700 pb-3">
             <SparklesIcon className="w-5 h-5 text-purple-600" />
-            <h3 className="font-bold text-lg text-gray-950 dark:text-white">Vice Principal Review & Actions</h3>
+            <h3 className="font-bold text-lg text-gray-950 dark:text-white">
+              {isPrincipal ? 'Principal Review & Actions' : isVP ? 'Vice Principal Review & Actions' : 'Executive Review & Actions'}
+            </h3>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Please add review remarks below. Approving will automatically route this complaint to the appropriate coordinator.
