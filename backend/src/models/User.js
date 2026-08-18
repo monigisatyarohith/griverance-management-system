@@ -31,7 +31,7 @@ const User = sequelize.define('User', {
     }
   },
   role: {
-    type: DataTypes.ENUM('student', 'faculty', 'hod', 'admin', 'vice_principal', 'coordinator'),
+    type: DataTypes.ENUM('student', 'faculty', 'hod', 'admin', 'vice_principal', 'coordinator', 'principal'),
     defaultValue: 'student'
   },
   department: {
@@ -47,6 +47,10 @@ const User = sequelize.define('User', {
     allowNull: true
   },
   isVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  mustChangePassword: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },

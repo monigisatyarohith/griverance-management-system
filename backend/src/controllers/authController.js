@@ -113,7 +113,7 @@ exports.login = async (req, res) => {
       resource: 'user',
       resourceId: user.id,
       ipAddress: req.ip,
-      userAgent: req.get('user-agent')
+      userAgent: req.get ? req.get('user-agent') : ''
     });
 
     const token = generateToken(user.id);
@@ -126,10 +126,13 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        department: user.department
+        department: user.department,
+        coordinatorType: user.coordinatorType,
+        mustChangePassword: user.mustChangePassword
       }
     });
   } catch (error) {
+    console.error('Login error detail:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -187,6 +190,7 @@ exports.resetPassword = async (req, res) => {
     }
 
     user.password = password;
+    user.mustChangePassword = false;
     user.resetPasswordToken = null;
     user.resetPasswordExpire = null;
     await user.save();
@@ -196,3 +200,142 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Update password for logged in user
+// @route   PUT /api/auth/update-password
+// @access  Private
+exports.updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Both current password and new password are required' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    const user = await User.scope('withPassword').findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    user.password = newPassword;
+    user.mustChangePassword = false;
+    await user.save();
+
+    await AuditLog.create({
+      userId: user.id,
+      action: 'update',
+      resource: 'user',
+      resourceId: user.id,
+      ipAddress: req.ip,
+      userAgent: req.get ? req.get('user-agent') : ''
+    });
+
+    const updatedUser = user.toJSON();
+    delete updatedUser.password;
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all coordinators
+// @route   GET /api/auth/coordinators
+// @access  Private (Principal, VP, Admin)
+exports.getCoordinators = async (req, res) => {
+  try {
+    const coordinators = await User.findAll({
+      where: { role: 'coordinator' }
+    });
+    const data = coordinators.map(u => {
+      const j = u.toJSON();
+      j._id = j.id;
+      return j;
+    });
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Create or update a coordinator
+// @route   POST /api/auth/coordinators
+// @access  Private (Principal, VP, Admin)
+exports.createOrUpdateCoordinator = async (req, res) => {
+  try {
+    const { name, email, coordinatorType, password } = req.body;
+
+    if (!email || !coordinatorType || !name) {
+      return res.status(400).json({ message: 'Name, email, and coordinator type are required' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    let coordinator = await User.scope('withPassword').findOne({
+      where: { email: normalizedEmail }
+    });
+
+    let isNew = false;
+    if (!coordinator) {
+      isNew = true;
+      const initialPassword = password || 'coordinator123';
+      coordinator = await User.create({
+        name,
+        email: normalizedEmail,
+        password: initialPassword,
+        role: 'coordinator',
+        coordinatorType,
+        isVerified: true,
+        mustChangePassword: true
+      });
+    } else {
+      coordinator.name = name;
+      coordinator.role = 'coordinator';
+      coordinator.coordinatorType = coordinatorType;
+      if (password) {
+        coordinator.password = password;
+        coordinator.mustChangePassword = true;
+      }
+      await coordinator.save();
+    }
+
+    // Also update system setting for this coordinator type mapping
+    const Setting = require('../models/Setting');
+    const settingKey = `coordinator_${coordinatorType}_email`;
+    const [setting] = await Setting.findOrCreate({ where: { key: settingKey }, defaults: { value: normalizedEmail } });
+    setting.value = normalizedEmail;
+    await setting.save();
+
+    await AuditLog.create({
+      userId: req.user.id,
+      action: isNew ? 'create' : 'assign',
+      resource: 'user',
+      resourceId: coordinator.id,
+      ipAddress: req.ip,
+      userAgent: req.get ? req.get('user-agent') : ''
+    });
+
+    const json = coordinator.toJSON();
+    delete json.password;
+    json._id = json.id;
+
+    res.json({
+      success: true,
+      message: isNew ? 'Coordinator created successfully.' : 'Coordinator updated successfully.',
+      data: json
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

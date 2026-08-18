@@ -55,6 +55,14 @@ const seedData = async () => {
       isVerified: true
     });
 
+    const principal = await User.create({
+      name: 'Principal Office',
+      email: 'principal@college.edu',
+      password: 'principal123456',
+      role: 'principal',
+      isVerified: true
+    });
+
     // Seed Coordinators
     const academicCoord = await User.create({
       name: 'Academic Coordinator',
@@ -223,6 +231,7 @@ const seedData = async () => {
 
     // Seed dynamic configurations in settings
     await Setting.create({ key: 'vice_principal_email', value: 'msatyarohith@gmail.com' });
+    await Setting.create({ key: 'principal_email', value: 'principal@college.edu' });
     await Setting.create({ key: 'coordinator_hostel_email', value: 'moningisatyarohith@gmail.com' });
     await Setting.create({ key: 'coordinator_academic_email', value: 'academic_coord@college.edu' });
     await Setting.create({ key: 'coordinator_transport_email', value: 'transport_coord@college.edu' });
@@ -235,6 +244,7 @@ const seedData = async () => {
     console.log(`\n✅ Seed data created successfully! (${dbType})`);
     console.log('\n📋 Test Credentials:');
     console.log('   Admin:          admin@college.edu / admin123');
+    console.log('   Principal:      principal@college.edu / principal123456');
     console.log('   Vice Principal: msatyarohith@gmail.com / vp123456');
     console.log('   Student:        student@college.edu / student123');
     console.log('   Academic Coord: academic_coord@college.edu / coordinator123');

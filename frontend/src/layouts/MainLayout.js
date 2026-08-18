@@ -41,14 +41,14 @@ const MainLayout = () => {
   }, []);
 
   const menuItems = [
-    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal'] },
+    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal', 'principal'] },
     { path: '/complaints', icon: DocumentTextIcon, label: 'My Complaints', roles: ['student'] },
-    { path: '/complaints', icon: DocumentTextIcon, label: 'Assigned Complaints', roles: ['faculty', 'hod', 'coordinator', 'vice_principal'] },
+    { path: '/complaints', icon: DocumentTextIcon, label: 'All Grievances', roles: ['faculty', 'hod', 'coordinator', 'vice_principal', 'principal'] },
     { path: '/submit-complaint', icon: PlusCircleIcon, label: 'Submit Complaint', roles: ['student'] },
-    { path: '/notifications', icon: BellIcon, label: 'Notifications', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal'] },
-    { path: '/analytics', icon: ChartBarIcon, label: 'Analytics', roles: ['admin', 'hod', 'vice_principal'] },
+    { path: '/notifications', icon: BellIcon, label: 'Notifications', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal', 'principal'] },
+    { path: '/analytics', icon: ChartBarIcon, label: 'Analytics', roles: ['admin', 'hod', 'vice_principal', 'principal'] },
     { path: '/admin/users', icon: UserGroupIcon, label: 'User Management', roles: ['admin'] },
-    { path: '/profile', icon: UserCircleIcon, label: 'Profile', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal'] },
+    { path: '/profile', icon: UserCircleIcon, label: 'Profile', roles: ['student', 'faculty', 'hod', 'admin', 'coordinator', 'vice_principal', 'principal'] },
   ];
 
   const filteredMenu = menuItems.filter(item => item.roles.includes(user?.role));
@@ -66,9 +66,11 @@ const MainLayout = () => {
       {/* Logo */}
       <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex-shrink-0"></div>
+          <div className="w-8 h-8 bg-gradient-to-r from-slate-900 to-indigo-700 rounded-lg flex-shrink-0 flex items-center justify-center text-white font-black text-sm shadow-sm">
+            G
+          </div>
           {(isMobile || sidebarOpen) && (
-            <span className="font-bold text-xl">GrievanceSys</span>
+            <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Grievance<span className="text-indigo-600 dark:text-indigo-400">Sys</span></span>
           )}
         </div>
         {isMobile ? (
@@ -96,11 +98,11 @@ const MainLayout = () => {
             onClick={() => handleNavigation(item.path)}
             className={`w-full flex items-center space-x-3 px-4 py-3 transition-colors ${
               isActive(item.path)
-                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-r-3 border-blue-600'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border-r-4 border-indigo-600 font-semibold'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
             }`}
           >
-            <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive(item.path) ? 'text-blue-600 dark:text-blue-400' : ''}`} />
+            <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive(item.path) ? 'text-indigo-600 dark:text-indigo-400' : ''}`} />
             {(isMobile || sidebarOpen) && (
               <span className="text-sm font-medium">{item.label}</span>
             )}
@@ -111,18 +113,18 @@ const MainLayout = () => {
       {/* User Info */}
       <div className="border-t dark:border-gray-700 p-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+          <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 shadow-sm">
             {user?.name?.charAt(0)}
           </div>
           {(isMobile || sidebarOpen) && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role}</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{user?.name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role?.replace('_', ' ')}</p>
             </div>
           )}
           <button
             onClick={logout}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex-shrink-0"
             title="Logout"
           >
             <ArrowRightOnRectangleIcon className="w-5 h-5" />
@@ -143,10 +145,10 @@ const MainLayout = () => {
           <Bars3Icon className="w-6 h-6" />
         </button>
         <div className="flex items-center space-x-2">
-          <div className="w-7 h-7 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg"></div>
-          <span className="font-bold text-lg">GrievanceSys</span>
+          <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">G</div>
+          <span className="font-extrabold text-lg">Grievance<span className="text-indigo-600">Sys</span></span>
         </div>
-        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+        <div className="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
           {user?.name?.charAt(0)}
         </div>
       </div>
@@ -188,6 +190,23 @@ const MainLayout = () => {
 
       {/* Main Content */}
       <main className={`transition-all duration-300 pt-14 lg:pt-0 ${sidebarOpen ? 'lg:ml-[280px]' : 'lg:ml-20'}`}>
+        {user?.mustChangePassword && location.pathname !== '/profile' && (
+          <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 px-6">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">🔑</span>
+              <div>
+                <p className="font-bold text-sm">Action Required: First-Time Login Password Update</p>
+                <p className="text-xs opacity-90">You are logged in with temporary credentials. Please update your password to secure your account.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/profile')}
+              className="bg-white text-orange-700 hover:bg-orange-50 px-4 py-1.5 rounded-xl font-bold text-xs shadow transition whitespace-nowrap"
+            >
+              Update Password Now
+            </button>
+          </div>
+        )}
         <div className="p-4 sm:p-6">
           <Outlet />
         </div>
