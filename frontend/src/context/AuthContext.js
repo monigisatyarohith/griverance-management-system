@@ -62,6 +62,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updatePassword = async (currentPassword, newPassword) => {
+    try {
+      const response = await authAPI.updatePassword({ currentPassword, newPassword });
+      setUser(prev => ({ ...prev, mustChangePassword: false }));
+      toast.success(response.data.message || 'Password updated successfully!');
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update password');
+      return false;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -71,8 +83,10 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    setUser,
     login,
     register,
+    updatePassword,
     logout,
     loading,
     isAuthenticated: !!token

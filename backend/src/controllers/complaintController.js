@@ -284,10 +284,15 @@ exports.approveComplaint = async (req, res) => {
       complaint.assignedToId = targetCoordinatorUser.id;
     }
 
+    const actorRole = req.user.role === 'principal' ? 'Principal'
+      : req.user.role === 'vice_principal' ? 'Vice Principal'
+      : req.user.role === 'admin' ? 'Admin'
+      : 'Vice Principal';
+
     const timeline = complaint.timeline || [];
     timeline.push({
       status: 'Approved by Vice Principal',
-      message: remarks || 'Grievance approved by Vice Principal and assigned to coordinator',
+      message: remarks || `Grievance approved by ${actorRole} and assigned to coordinator`,
       changedBy: req.user.id,
       timestamp: new Date()
     });
@@ -359,6 +364,39 @@ exports.approveComplaint = async (req, res) => {
       relatedComplaintId: complaint.id
     });
 
+    // In-app notification to Principal users
+    const principalUsers = await User.findAll({ where: { role: 'principal' } });
+    for (const pUser of principalUsers) {
+      await Notification.create({
+        userId: pUser.id,
+        title: 'Grievance Approved by VP',
+        message: `Vice Principal approved grievance #${complaint.id} ("${complaint.title}")`,
+        type: 'complaint_update',
+        relatedComplaintId: complaint.id
+      });
+    }
+
+    // Email notification to Principal
+    const principalSetting = await Setting.findOne({ where: { key: 'principal_email' } });
+    const principalEmail = principalSetting ? principalSetting.value : (principalUsers[0]?.email || 'principal@college.edu');
+    if (principalEmail) {
+      sendEmail({
+        email: principalEmail,
+        subject: `[Executive Notice] Grievance Approved by Vice Principal: #${complaint.id}`,
+        message: `Grievance #${complaint.id} has been approved by the Vice Principal and routed to coordinator. Remarks: ${remarks || 'None'}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; max-width: 600px; border: 1px solid #E5E7EB; border-radius: 8px;">
+            <h2 style="color: #7C3AED;">Executive Notice - Grievance Approved by VP</h2>
+            <p>Vice Principal has reviewed and <strong>Approved</strong> grievance <strong>#${complaint.id}</strong> ("${complaint.title}").</p>
+            <p><strong>Remarks:</strong> ${remarks || 'None'}</p>
+            <p><strong>Priority:</strong> ${priority || complaint.priority}</p>
+            <hr style="border: 0; border-top: 1px solid #E5E7EB; margin-top: 20px;"/>
+            <p style="color: #9CA3AF; font-size: 11px;">College Grievance Management System</p>
+          </div>
+        `
+      }).catch(err => console.error('Error sending email to principal:', err));
+    }
+
     // Audit Log
     await AuditLog.create({
       userId: req.user.id,
@@ -399,10 +437,15 @@ exports.rejectComplaint = async (req, res) => {
 
     complaint.status = 'Rejected by Vice Principal';
 
+    const actorRole = req.user.role === 'principal' ? 'Principal'
+      : req.user.role === 'vice_principal' ? 'Vice Principal'
+      : req.user.role === 'admin' ? 'Admin'
+      : 'Vice Principal';
+
     const timeline = complaint.timeline || [];
     timeline.push({
       status: 'Rejected by Vice Principal',
-      message: remarks || 'Grievance rejected by Vice Principal',
+      message: remarks || `Grievance rejected by ${actorRole}`,
       changedBy: req.user.id,
       timestamp: new Date()
     });
@@ -438,6 +481,38 @@ exports.rejectComplaint = async (req, res) => {
       type: 'complaint_update',
       relatedComplaintId: complaint.id
     });
+
+    // In-app notification to Principal users
+    const principalUsersRej = await User.findAll({ where: { role: 'principal' } });
+    for (const pUser of principalUsersRej) {
+      await Notification.create({
+        userId: pUser.id,
+        title: 'Grievance Rejected by VP',
+        message: `Vice Principal rejected grievance #${complaint.id} ("${complaint.title}")`,
+        type: 'complaint_update',
+        relatedComplaintId: complaint.id
+      });
+    }
+
+    // Email notification to Principal
+    const principalSettingRej = await Setting.findOne({ where: { key: 'principal_email' } });
+    const principalEmailRej = principalSettingRej ? principalSettingRej.value : (principalUsersRej[0]?.email || 'principal@college.edu');
+    if (principalEmailRej) {
+      sendEmail({
+        email: principalEmailRej,
+        subject: `[Executive Notice] Grievance Rejected by Vice Principal: #${complaint.id}`,
+        message: `Grievance #${complaint.id} has been rejected by the Vice Principal. Remarks: ${remarks || 'None'}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; max-width: 600px; border: 1px solid #E5E7EB; border-radius: 8px;">
+            <h2 style="color: #EF4444;">Executive Notice - Grievance Rejected by VP</h2>
+            <p>Vice Principal has reviewed and <strong>Rejected</strong> grievance <strong>#${complaint.id}</strong> ("${complaint.title}").</p>
+            <p><strong>Remarks / Reason:</strong> ${remarks || 'None'}</p>
+            <hr style="border: 0; border-top: 1px solid #E5E7EB; margin-top: 20px;"/>
+            <p style="color: #9CA3AF; font-size: 11px;">College Grievance Management System</p>
+          </div>
+        `
+      }).catch(err => console.error('Error sending email to principal:', err));
+    }
 
     // Audit Log
     await AuditLog.create({
@@ -743,10 +818,15 @@ exports.updatePriority = async (req, res) => {
     const oldPriority = complaint.priority;
     complaint.priority = priority;
 
+    const actorRole = req.user.role === 'principal' ? 'Principal'
+      : req.user.role === 'vice_principal' ? 'Vice Principal'
+      : req.user.role === 'admin' ? 'Admin'
+      : (req.user.name || 'Staff');
+
     const timeline = complaint.timeline || [];
     timeline.push({
       status: complaint.status,
-      message: `Priority updated from ${oldPriority} to ${priority} by Vice Principal`,
+      message: `Priority updated from ${oldPriority} to ${priority} by ${actorRole}`,
       changedBy: req.user.id,
       timestamp: new Date()
     });
@@ -776,6 +856,60 @@ exports.updatePriority = async (req, res) => {
       success: true,
       data: formatComplaint(reloaded)
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Add Principal / Executive Remarks
+// @route   POST /api/complaints/:id/remarks
+// @access  Private (Principal, Vice Principal, Admin)
+exports.addPrincipalRemarks = async (req, res) => {
+  try {
+    const { remarks } = req.body;
+    if (!remarks) {
+      return res.status(400).json({ message: 'Remarks are required' });
+    }
+
+    const complaint = await Complaint.findByPk(req.params.id, {
+      include: [{ model: User, as: 'student' }]
+    });
+
+    if (!complaint) {
+      return res.status(404).json({ message: 'Complaint not found' });
+    }
+
+    const roleName = req.user.role === 'principal' ? 'Principal' : (req.user.role === 'vice_principal' ? 'Vice Principal' : 'Admin');
+    const timeline = complaint.timeline || [];
+    timeline.push({
+      status: complaint.status,
+      message: `[${roleName} Executive Remarks] ${remarks}`,
+      changedBy: req.user.id,
+      timestamp: new Date()
+    });
+    complaint.timeline = timeline;
+
+    await complaint.save();
+
+    // Create Audit Log
+    await AuditLog.create({
+      userId: req.user.id,
+      action: 'add_remarks',
+      resource: 'complaint',
+      resourceId: complaint.id,
+      details: { remarks },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent')
+    });
+
+    const reloaded = await Complaint.findByPk(complaint.id, {
+      include: [
+        { model: User, as: 'student', attributes: ['id', 'name', 'email', 'department'] },
+        { model: User, as: 'assignedTo', attributes: ['id', 'name', 'email'] }
+      ]
+    });
+
+    res.json({ success: true, data: formatComplaint(reloaded) });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

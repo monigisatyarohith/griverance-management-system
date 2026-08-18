@@ -9,7 +9,8 @@ const {
   getGrievanceUpdates,
   getStats,
   updateStatus,
-  updatePriority
+  updatePriority,
+  addPrincipalRemarks
 } = require('../controllers/complaintController');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
@@ -22,10 +23,11 @@ router.route('/')
 
 router.get('/stats', getStats);
 
-// Vice Principal routing approvals and priority updates
-router.put('/:id/approve', authorize('vice_principal', 'admin'), approveComplaint);
-router.put('/:id/reject', authorize('vice_principal', 'admin'), rejectComplaint);
-router.put('/:id/priority', authorize('vice_principal', 'admin'), updatePriority);
+// Vice Principal & Principal routing approvals, priority updates, and executive remarks
+router.put('/:id/approve', authorize('vice_principal', 'principal', 'admin'), approveComplaint);
+router.put('/:id/reject', authorize('vice_principal', 'principal', 'admin'), rejectComplaint);
+router.put('/:id/priority', authorize('vice_principal', 'principal', 'admin'), updatePriority);
+router.post('/:id/remarks', authorize('principal', 'vice_principal', 'admin'), addPrincipalRemarks);
 
 // Coordinator stage and progress updates
 router.post('/:id/updates', authorize('coordinator', 'admin'), upload.array('attachments', 2), addGrievanceUpdate);

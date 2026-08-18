@@ -25,6 +25,7 @@ const AdminPanel = () => {
   
   // Settings tab state
   const [settings, setSettings] = useState({
+    principal_email: '',
     vice_principal_email: '',
     coordinator_academic_email: '',
     coordinator_hostel_email: '',
@@ -122,6 +123,8 @@ const AdminPanel = () => {
 
   const roleColors = {
     admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    principal: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+    vice_principal: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
     hod: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
     faculty: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     student: 'bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300',
@@ -206,6 +209,7 @@ const AdminPanel = () => {
                           <option value="faculty">Faculty</option>
                           <option value="hod">HOD</option>
                           <option value="vice_principal">Vice Principal</option>
+                          <option value="principal">Principal</option>
                           <option value="admin">Admin</option>
                         </select>
                       ) : (
